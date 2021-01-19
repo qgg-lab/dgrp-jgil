@@ -33,9 +33,11 @@ There is a file `file.info` that stores the fasqt information. This file has thr
 This is the script to convert `fastq` to `gvcf`. It is a wrapper around a bunch of `sbatch` scripts that are in the directory [sbatch/](sbatch/). A basic command is like this:
 
 ```bash
-# --resource specifies where the resources are located, including the sbatch scripts, etc.
+# --resource specifies where the resources are located, including the sbatch scripts 
+#        in one sbatch directory, etc. Other bash scripts can stay in the --resource dir or
+#        anywhere else you like.
 # --dir tells where to look for the fastq files, within this directory
-#         there will be one directory for each sample
+#       there will be one directory for each sample
 # --tmp temporary location, this is important, and make sure there is enough space
 # --out output directory, there will be one gvcf within each newly created directory within this directory.
 # --sample sample name (directory name within --dir)
@@ -60,4 +62,22 @@ You can either loop through all samples, which will queue everything and is perf
 
 ### 3. Run `combineGVCFs.sbatch` and `genotypeGVCFs.sbatch`
 
-These two `sbatch` scripts take the GVCFs
+These two `sbatch` scripts take the GVCFs and convert them to `VCF`.
+
+### 4. Get allele counts
+
+Use the `perl` script to convert `GATK` produced `VCF` to allele counts
+```bash
+gunzip -c /mnt/gs18/scratch/users/tansuxu/dgrp/gvcfs/combine/all.vcf.gz | perl /mnt/research/qgg/resource/dgrp/alleleCounts.pl > /mnt/gs18/scratch/users/tansuxu/dgrp/jgil/all.counts.out 2> /mnt/gs18/scratch/users/tansuxu/dgrp/jgil/allele.counts.log &
+```
+
+### 5. Run JGIL
+
+Use the `R` script to convert the allele counts to `VCF` with JGIL produced quality scores and calls. This step can take a while. However, it's possible to split the allele counts produced in the step above to parallize and combine the `VCF`s subsequently. The implentation in `R` is a re-write of the `matlab` script by Eric Stone. Also refer to Eric's [paper](https://pubmed.ncbi.nlm.nih.gov/22367192/).
+
+```bash
+srun --mem=4G --nodes=1 --ntasks-per-node=1 --cpus-per-task=2 --time=72:00:00 /mnt/research/qgg/software/R-3.6.0/bin/Rscript /mnt/research/qgg/resource/dgrp/jgil.R /mnt/gs18/scratch/users/tansuxu/dgrp/jgil/all.counts.out /mnt/gs18/scratch/users/tansuxu/dgrp/jgil/all.jgil.vcf > /mnt/gs18/scratch/users/tansuxu/dgrp/jgil/jgil.Rout 2>&1 &
+```
+
+
+
