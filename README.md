@@ -33,7 +33,26 @@ There is a file `file.info` that stores the fasqt information. This file has thr
 This is the script to convert `fastq` to `gvcf`. It is a wrapper around a bunch of `sbatch` scripts that are in the directory [sbatch/](sbatch/). A basic command is like this:
 
 ```bash
-# 
+# --resource specifies where the resources are located, including the sbatch scripts, etc.
+# --dir tells where to look for the fastq files, within this directory
+#         there will be one directory for each sample
+# --tmp temporary location, this is important, and make sure there is enough space
+# --out output directory, there will be one gvcf within each newly created directory within this directory.
+# --sample sample name (directory name within --dir)
+# my --resource diretory looks like this
+[huangw53@dev-intel18 dgrp]$ ls -lrt
+total 828618
+-rw-r----- 1 huangw53 qgg 3876365063 Dec  9 12:02 dgrp.r6.vcf
+-rw-r----- 1 huangw53 qgg  223754162 Dec  9 12:03 dgrp.freeze2.r6.lift.vcf
+-rw-r----- 1 huangw53 qgg    1183827 Dec  9 12:04 dgrp.freeze2.r6.lift.vcf.idx
+-rw-r----- 1 huangw53 qgg       2972 Dec  9 12:04 dgrp.freeze2.r6.lift.vcf.index.log
+-rwxr-x--- 1 huangw53 qgg       3769 Dec 10 21:37 bam2fqwait.bash
+-rw-r----- 1 huangw53 qgg       1200 Dec 13 12:17 resource.env
+-rwxr-x--- 1 huangw53 qgg      19927 Dec 14 12:33 fq2gvcf.bash
+drwxr-s--- 2 huangw53 qgg       8192 Dec 15 20:06 sbatch
+-rw-r----- 1 huangw53 qgg       8269 Dec 27 12:16 jgil.R
+-rwxr-x--- 1 huangw53 qgg        864 Dec 27 12:16 alleleCounts.pl
+
 bash /mnt/research/qgg/resource/dgrp/fq2gvcf.bash --resource /mnt/research/qgg/resource/dgrp --dir /mnt/gs18/scratch/users/tansuxu/dgrp --tmp /mnt/gs18/scratch/users/tansuxu/tmp --out /mnt/gs18/scratch/users/tansuxu/dgrp/gvcfs --sample 379 > /mnt/gs18/scratch/users/tansuxu/dgrp/gvcfs/379.out 2>&1 &
 ```
 
